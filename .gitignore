@@ -1,0 +1,4 @@
+.envrc
+.vscode
+*.log
+mechatronics4/videos/*
