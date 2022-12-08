@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 32)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 32)
-    cap.set(cv2.CAP_PROP_FPS, 5)
+    cap.set(cv2.CAP_PROP_FPS, 30)
 
     try:
         while True:
