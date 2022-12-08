@@ -70,7 +70,7 @@ if __name__ == "__main__":
             elif k == "f":
                 ser.write(b"temperature\n")
                 ser.reset_input_buffer()
-                time.sleep(6)
+                time.sleep(10)
                 read_input_buffer()
             elif k == "space":
                 print("picture")

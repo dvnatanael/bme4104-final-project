@@ -5,10 +5,10 @@
 
 uint8_t const leftMotorPin0 = 5;
 uint8_t const leftMotorPin1 = 6;
-uint8_t const rightMotorPin0 = 10;
+uint8_t const rightMotorPin0 = 3;
 uint8_t const rightMotorPin1 = 11;
 
-uint8_t const buzzerPin = 7;
+uint8_t const buzzerPin = 4;
 uint8_t const echoPin = 12;
 uint8_t const triggerPin = 13;
 
@@ -16,7 +16,7 @@ uint8_t const dhtPin = 8;
 uint8_t const servoPin = 9;
 
 unsigned long const toneDuration_ms = 1000;
-unsigned int const toneFrequency_hz = 200;
+unsigned long const toneFrequency_hz = 200;
 
 unsigned long pulseDuration_us;
 float obstacleDistance_cm;
@@ -26,6 +26,7 @@ String command;
 DHT dht(dhtPin, dhtType);
 Servo myServo;
 
+void beep(uint8_t, unsigned long, unsigned long);
 void readSurroundingTemperature();
 float calculateDistanceToObstacle();
 
@@ -45,16 +46,16 @@ void setup()
     dht.begin();
 
     myServo.attach(servoPin);
-    myServo.write(90);
-
-    delay(200);
+    myServo.write(110);
 }
 
 void loop()
 {
     obstacleDistance_cm = calculateDistanceToObstacle();
-    if (0 < obstacleDistance_cm && obstacleDistance_cm < 5)
-        tone(buzzerPin, toneFrequency_hz, toneDuration_ms);
+    if (5 < obstacleDistance_cm && obstacleDistance_cm < 30)
+    {
+        beep(buzzerPin, toneFrequency_hz, toneDuration_ms);
+    }
 
     if (Serial.available())
     {
@@ -63,11 +64,11 @@ void loop()
 
         if (command == "open")
         {
-            myServo.write(40);
+            myServo.write(130);
         }
         else if (command == "close")
         {
-            myServo.write(0);
+            myServo.write(95);
         }
         else if (command == "temperature")
         {
@@ -77,7 +78,7 @@ void loop()
         {
             analogWrite(leftMotorPin0, 50);
             analogWrite(leftMotorPin1, 0);
-            analogWrite(rightMotorPin0, 50);
+            analogWrite(rightMotorPin0, 40);
             analogWrite(rightMotorPin1, 0);
         }
         else if (command == "backward")
@@ -85,21 +86,21 @@ void loop()
             analogWrite(leftMotorPin0, 0);
             analogWrite(leftMotorPin1, 50);
             analogWrite(rightMotorPin0, 0);
-            analogWrite(rightMotorPin1, 50);
+            analogWrite(rightMotorPin1, 40);
         }
         else if (command == "left")
         {
             analogWrite(leftMotorPin0, 0);
-            analogWrite(leftMotorPin1, 50);
-            analogWrite(rightMotorPin0, 50);
+            analogWrite(leftMotorPin1, 30);
+            analogWrite(rightMotorPin0, 35);
             analogWrite(rightMotorPin1, 0);
         }
         else if (command == "right")
         {
-            analogWrite(leftMotorPin0, 50);
+            analogWrite(leftMotorPin0, 30);
             analogWrite(leftMotorPin1, 0);
             analogWrite(rightMotorPin0, 0);
-            analogWrite(rightMotorPin1, 50);
+            analogWrite(rightMotorPin1, 35);
         }
         else
         {
@@ -108,6 +109,19 @@ void loop()
             analogWrite(rightMotorPin0, 0);
             analogWrite(rightMotorPin1, 0);
         }
+    }
+}
+
+void beep(uint8_t pin, unsigned long freq_hz, unsigned long duration_ms)
+{
+    unsigned long start = millis();
+    while (millis() - start < duration_ms)
+    {
+        unsigned long halfPeriod_us = 1e6 / (freq_hz * 2);
+        digitalWrite(buzzerPin, HIGH);
+        delayMicroseconds(halfPeriod_us);
+        digitalWrite(buzzerPin, LOW);
+        delayMicroseconds(halfPeriod_us);
     }
 }
 
@@ -123,16 +137,20 @@ void readSurroundingTemperature()
         Serial.print("Temperature: ");
         Serial.print(String(temperature_C));
         Serial.println("*C");
+        Serial.print("Distance: ");
+        Serial.print(String(obstacleDistance_cm));
+        Serial.println(" cm");
     }
 }
 
 float calculateDistanceToObstacle()
 {
     // send a ~10 us pulse to trigger the ultrasonic sensor
+    digitalWrite(echoPin, LOW);
     digitalWrite(triggerPin, LOW);
     delayMicroseconds(1);
     digitalWrite(triggerPin, HIGH);
-    delayMicroseconds(10);
+    delayMicroseconds(12);
     digitalWrite(triggerPin, LOW);
 
     // read the duration of reflected pulse
