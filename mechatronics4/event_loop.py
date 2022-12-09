@@ -47,6 +47,7 @@ if __name__ == "__main__":
     print(f"Using port: {arduino_port}")
     baud_rate = 9600
     ser = serial.Serial(arduino_port, baud_rate)
+    ser.flush()
 
     try:
         while True:
@@ -81,7 +82,7 @@ if __name__ == "__main__":
             read_input_buffer()
     except (KeyboardInterrupt, SystemExit):
         ser.write(b"stop\n")
-    except ser.SerialException:
+    except serial.SerialException:
         pass
     finally:
         os.system("stty sane")
